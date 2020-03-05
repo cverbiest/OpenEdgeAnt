@@ -1,0 +1,8 @@
+{
+    "workingDirectory": "${workspaceFolder}\\corelib",
+    "proPath": [
+        "${workspaceFolder}",
+        "${workspaceFolder}\\src\\main\\abl",
+        "${workspaceFolder}\\src\\test\\abl"
+    ]
+}

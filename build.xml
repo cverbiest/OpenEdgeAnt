@@ -1,0 +1,106 @@
+<!--
+    openedgeANT demo
+    Date: Oct 18 2018
+    Author: Cameron David Wright
+-->
+<project name="openedgeGradle" default="test" 
+            basedir="." >
+    
+    <target name="init-vars" >
+        <property environment="env"/>
+        <property name="dlc" value="${env.DLC}"/>
+        <property name="dlc" value="${dlc}/pct"/>
+        <property file="properties/project.properties"/>
+        <property file="properties/build.properties"/>
+        <taskdef resource="PCT.properties" classpath="${pct}/PCT.jar" loaderRef="pct" />
+        <typedef resource="types.properties" classpath="${pct}/PCT.jar" loaderRef="pct" />
+    </target>
+
+    <target name="init" depends="init-vars">
+        <!-- 
+            test to make sure everything that should be installed is installed 
+            We need a Proversion of 11.6 at a minumum
+        -->
+        <tstamp/>
+        <echo>Project Name: ${Project.Name}</echo>
+        <echo>DLC=${dlc}</echo>
+        <echo>PCT=${pct}</echo>
+        <PCTVersion />
+        <ProgressVersion dlcHome="${dlc}" majorVersion="major" minorVersion="minor" patchLevel="patch" revision="revision" fullVersion="full" />
+        <echo message="${major} -- ${minor} -- ${revision}" />
+        <echo message="${full}" />
+        <buildnumber/>
+    </target>
+
+    <target name="build" depends="init"
+            description="pre-build the source">
+        <!-- Pre-build activities that need to happen before the compile of the classes-->
+        <mkdir dir="${dir.build}"/>
+    </target>
+
+    <target name="compile" depends="build"
+        description="compile the source">
+    <!-- Compile the OpenEdge class code from ${src} into ${build} -->
+        <PCTCompile destDir="${dir.rcode}" dlcHome="${dlc}" forceCompile="true">
+            <fileset dir="${dir.src}" casesensitive="yes">
+                <include name="**/*.cls"/>
+                <include name="**/*.p"/>
+                <include name="**/*.w"/>
+            </fileset>
+            <propath>
+                <pathelement path="${dir.src}"/>
+            </propath>
+        </PCTCompile>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution artifacts">
+            <!-- Create the distribution directory -->
+        <mkdir dir="${dir.dist}"/>
+        <!-- Lets create the r-code artifact -->
+        <PCTLibrary destfile="${dir.dist}/${Project.Name}-${Project.Status}-${Project.Version}.pl" 
+                    dlcHome="${dlc}">
+            <fileset dir="${dir.rcode}">
+                <include name="**/*.r" />
+                <exclude name="test/**"/>
+                <exclude name="**/*Test*.r"/>
+            </fileset>
+        </PCTLibrary>
+        <!-- Lets create the source code artifact now-->
+        <PCTLibrary destfile="${dir.dist}/${Project.Name}-SRC-${Project.Status}-${Project.Version}.pl" 
+                    dlcHome="${dlc}">
+            <fileset dir="${dir.src}">
+                <include name="**/*.cls" />
+                <include name="**/*.p" />
+                <include name="**/*.w" />
+                <include name="**/*.i" />
+            </fileset>
+            <fileset dir="${dir.test}">
+                <include name="**/*.cls" />
+                <include name="**/*.p" />
+                <include name="**/*.w" />
+                <include name="**/*.i" />
+            </fileset>            
+        </PCTLibrary>
+     </target>
+
+    <target name="test" depends="dist">
+        <mkdir dir="${dir.test.results}"/>
+        <ABLUnit dlcHome="${dlc}" destDir="${dir.test.results}" debugPCT="true" writeLog="true">
+            <fileset dir="${dir.test}" casesensitive="yes">
+                <include name="**/*.cls"/>
+            </fileset>
+			<propath>
+                <pathelement path="${dir.test}"/>
+                <pathelement location="${dir.dist}/${Project.Name}-${Project.Status}-${Project.Version}.pl" />
+			</propath>
+		</ABLUnit>   
+    </target>
+
+    <target name="clean"
+            depends="init-vars">
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${dir.build}"/>
+    </target>
+
+</project>
