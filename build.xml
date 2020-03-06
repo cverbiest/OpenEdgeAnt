@@ -9,7 +9,7 @@
     <target name="init-vars" >
         <property environment="env"/>
         <property name="dlc" value="${env.DLC}"/>
-        <property name="dlc" value="${dlc}/pct"/>
+        <property name="pct" value="${dlc}/pct"/>
         <property file="properties/project.properties"/>
         <property file="properties/build.properties"/>
         <taskdef resource="PCT.properties" classpath="${pct}/PCT.jar" loaderRef="pct" />
