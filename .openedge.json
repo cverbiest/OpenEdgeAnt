@@ -1,4 +1,5 @@
 {
+    "dlc": "C:\\apps\\OE121\\dlc",
     "workingDirectory": "${workspaceFolder}\\corelib",
     "proPath": [
         "${workspaceFolder}",
